@@ -19,7 +19,7 @@
                 <?php
                     echo $this->Form->control('first_name');
                     echo $this->Form->control('last_name');
-                    echo $this->Form->control('image_profile');
+                    echo $this->Form->control('image_profile', ['type' => 'file']);
                     echo $this->Form->control('fb');
                     echo $this->Form->control('player_spotify');
                 ?>

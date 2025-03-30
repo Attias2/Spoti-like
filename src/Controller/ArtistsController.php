@@ -45,20 +45,46 @@ class ArtistsController extends AppController
      */
     public function add()
     {
-        
         $artist = $this->Artists->newEmptyEntity();
         $this->Authorization->authorize($artist, 'add');
+        
         if ($this->request->is('post')) {
+            // Gérer le fichier image
+            if (!empty($this->request->getData('image_profile')['tmp_name'])) {
+                // Récupérer l'image téléchargée
+                $image = $this->request->getData('image_profile');
+                
+                // Définir le nom du fichier
+                $imageName = uniqid() . '_' . $image['name'];
+                
+                // Définir le chemin de sauvegarde de l'image
+                $uploadPath = WWW_ROOT . 'img' . DS . 'artists' . DS;
+                $uploadFile = $uploadPath . $imageName;
+                
+                // Déplacer l'image vers le dossier 'artists'
+                if (move_uploaded_file($image['tmp_name'], $uploadFile)) {
+                    // Si l'image est téléchargée avec succès, on peut l'enregistrer dans l'entité
+                    $artist->image_profile = $imageName;
+                } else {
+                    $this->Flash->error(__('Failed to upload image.'));
+                    return $this->redirect(['action' => 'index']);
+                }
+            }
+            
+            // Patch des données et sauvegarde de l'artiste
             $artist = $this->Artists->patchEntity($artist, $this->request->getData());
+            
             if ($this->Artists->save($artist)) {
                 $this->Flash->success(__('The artist has been saved.'));
-
                 return $this->redirect(['action' => 'index']);
             }
+            
             $this->Flash->error(__('The artist could not be saved. Please, try again.'));
         }
+        
         $this->set(compact('artist'));
     }
+    
 
     /**
      * Edit method
